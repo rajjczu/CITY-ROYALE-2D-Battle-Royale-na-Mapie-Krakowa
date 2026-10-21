@@ -1,0 +1,6 @@
+{
+  "name": "CITY ROYALE — 2D Battle Royale na Mapie Krakowa",
+  "description": "Dynamiczna gra 2D Battle Royale osadzona na autentycznym układzie ulic, zabytków i parków centrum Krakowa z 10 broniami, botami i znikającymi dachami budynków.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
