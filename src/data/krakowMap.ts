@@ -7,7 +7,7 @@ import {
   PropData,
   StreetData,
 } from '../types/game';
-import { KRAKOW_GPS, PIXELS_PER_METER, WORLD_CENTER } from '../game/constants';
+import { KRAKOW_GPS, PIXELS_PER_METER, WORLD_CENTER, WORLD_SIZE_PX } from '../game/constants';
 
 /**
  * Projects real geographic coordinates (WGS84 lat, lon) to local world pixels centered at Rynek Główny.
@@ -59,22 +59,22 @@ export function makeWallSegment(p1: Point, p2: Point, thickness = 14): Point[] {
 }
 
 // ========================================================
-// 1. PLACE I RYNKI (Historical Plazas & Public Squares)
+// 1. PLACE I RYNKI (Historical Plazas & Public Squares across 1.5 km)
 // ========================================================
 export const KRAKOW_PLAZAS: PlazaData[] = [
   {
     id: 'rynek_glowny',
-    name: 'Rynek Główny (200m × 200m — Największy Rynek Średniowiecznej Europy)',
+    name: 'Rynek Główny (200m × 200m — Serce Krakowa)',
     polygon: makeRect(CX - 2400, CY - 2400, 4800, 4800),
   },
   {
     id: 'maly_rynek',
-    name: 'Mały Rynek (Dawny Rynek Sukienniczy i Targ Mięsny)',
+    name: 'Mały Rynek (Dawny Rynek Sukienniczy)',
     polygon: makeRect(CX + 2700, CY - 1400, 1100, 2200),
   },
   {
     id: 'plac_mariacki',
-    name: 'Plac Mariacki i Dawny Cmentarz Parafialny',
+    name: 'Plac Mariacki i Bazylika',
     polygon: makeRect(CX + 1600, CY - 2100, 1050, 1200),
   },
   {
@@ -88,19 +88,39 @@ export const KRAKOW_PLAZAS: PlazaData[] = [
     polygon: makeRect(CX + 100, CY + 2800, 1800, 1300),
   },
   {
-    id: 'plac_sw_marii_magdaleny',
-    name: 'Plac św. Marii Magdaleny (Kościół św. Piotra i Pawła)',
-    polygon: makeRect(CX + 200, CY + 5400, 900, 900),
+    id: 'plac_matejki',
+    name: 'Plac Jana Matejki (Pomnik Grunwaldzki & ASP)',
+    polygon: makeRect(CX - 800, CY - 8800, 1600, 1400),
   },
   {
-    id: 'plac_sw_ducha',
-    name: 'Plac św. Ducha (Teatr im. J. Słowackiego)',
-    polygon: makeRect(CX + 3800, CY - 4900, 1800, 1600),
+    id: 'rynek_kleparski',
+    name: 'Rynek Kleparski (Tradycyjne Targowisko Stary Kleparz)',
+    polygon: makeRect(CX - 1300, CY - 13000, 1100, 1000),
   },
   {
     id: 'plac_kolejowy',
-    name: 'Plac Kolejowy (Zabytkowy Dworzec Główny PKP)',
-    polygon: makeRect(CX + 5400, CY - 5800, 1600, 1400),
+    name: 'Plac Jana Nowaka-Jeziorańskiego (Dworzec Główny)',
+    polygon: makeRect(CX + 5400, CY - 6000, 1800, 1800),
+  },
+  {
+    id: 'plac_nowy_kazimierz',
+    name: 'Plac Nowy — Kazimierz (Słynny Okrąglak)',
+    polygon: makeRect(CX + 1500, CY + 13000, 1800, 1400),
+  },
+  {
+    id: 'plac_wolnica',
+    name: 'Plac Wolnica — Kazimierz (Dawny Ratusz Kazimierski)',
+    polygon: makeRect(CX + 200, CY + 15800, 1800, 1500),
+  },
+  {
+    id: 'rynek_podgorski',
+    name: 'Rynek Podgórski (Kościół św. Józefa)',
+    polygon: makeRect(CX + 1300, CY + 16300, 1200, 1100),
+  },
+  {
+    id: 'plac_bohaterow_getta',
+    name: 'Plac Bohaterów Getta (Apteka pod Orłem)',
+    polygon: makeRect(CX + 4100, CY + 16300, 1100, 1100),
   },
   {
     id: 'dziedziniec_arkadowy_wawel',
@@ -108,28 +128,23 @@ export const KRAKOW_PLAZAS: PlazaData[] = [
     polygon: makeRect(CX - 200, CY + 8400, 1300, 1300),
   },
   {
-    id: 'dziedziniec_zewnetrzny_wawel',
-    name: 'Wawel — Dziedziniec Zewnętrzny (Pod Katedrą)',
-    polygon: makeRect(CX - 1900, CY + 8100, 1600, 1400),
-  },
-  {
     id: 'bulwary_wislane',
-    name: 'Bulwary Wiślane pod Wawelem',
+    name: 'Bulwary Czerwieński i Poleski nad Wisłą',
     polygon: [
-      { x: CX - 7200, y: CY + 9200 },
-      { x: CX - 4800, y: CY + 10400 },
-      { x: CX - 2200, y: CY + 11800 },
-      { x: CX + 2000, y: CY + 12800 },
-      { x: CX + 6000, y: CY + 12600 },
-      { x: CX + 6000, y: CY + 13200 },
-      { x: CX - 2200, y: CY + 12400 },
-      { x: CX - 7200, y: CY + 9800 },
+      { x: CX - 10000, y: CY + 9500 },
+      { x: CX - 5000, y: CY + 10600 },
+      { x: CX - 1500, y: CY + 11600 },
+      { x: CX + 4000, y: CY + 12400 },
+      { x: CX + 10000, y: CY + 12000 },
+      { x: CX + 10000, y: CY + 12800 },
+      { x: CX - 1500, y: CY + 12400 },
+      { x: CX - 10000, y: CY + 10300 },
     ],
   },
 ];
 
 // ========================================================
-// 2. RZEKA WISŁA (Vistula River Bend)
+// 2. RZEKA WISŁA (Vistula River Sweeping Bend across 1.5 km)
 // ========================================================
 export interface RiverData {
   id: string;
@@ -139,404 +154,37 @@ export interface RiverData {
 
 export const KRAKOW_RIVER: RiverData = {
   id: 'wisla_krakow',
-  name: 'Wisła — Zakole pod Wawelem i Smoczą Jamą',
+  name: 'Wisła — Zakole pod Wawelem i Mosty Krakowskie',
   polygon: [
-    { x: CX - 9000, y: CY + 6500 },
-    { x: CX - 6500, y: CY + 8200 },
-    { x: CX - 4200, y: CY + 10200 },
-    { x: CX - 2400, y: CY + 12400 },
-    { x: CX + 200, y: CY + 13800 },
-    { x: CX + 3200, y: CY + 14200 },
-    { x: CX + 7500, y: CY + 13800 },
-    { x: CX + 9000, y: CY + 13500 },
-    { x: CX + 9000, y: CY + 17500 },
-    { x: CX - 9000, y: CY + 17500 },
+    { x: CX - 17500, y: CY + 8500 },
+    { x: CX - 11000, y: CY + 9800 },
+    { x: CX - 6500, y: CY + 10800 },
+    { x: CX - 2000, y: CY + 11900 },
+    { x: CX + 3000, y: CY + 12600 },
+    { x: CX + 9000, y: CY + 12300 },
+    { x: CX + 17500, y: CY + 11500 },
+    { x: CX + 17500, y: CY + 14000 },
+    { x: CX + 8000, y: CY + 14500 },
+    { x: CX + 2000, y: CY + 14800 },
+    { x: CX - 3000, y: CY + 14200 },
+    { x: CX - 8000, y: CY + 12800 },
+    { x: CX - 12000, y: CY + 11800 },
+    { x: CX - 17500, y: CY + 10500 },
   ],
 };
 
 // ========================================================
 // 3. ULICE I CHODNIKI KRAKOWA (Full Real Street Network)
 // ========================================================
-export const KRAKOW_STREETS: StreetData[] = [
-  // --- TRAKT KRÓLEWSKI (DROGA KRÓLEWSKA) ---
-  {
-    id: 'ul_florianska',
-    name: 'ul. Floriańska (Rynek Główny <-> Brama Floriańska <-> Planty <-> Basztowa)',
-    width: 56,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX + 820, y: CY - 2200 },
-      { x: CX + 820, y: CY - 3600 },
-      { x: CX + 820, y: CY - 4800 },
-      { x: CX + 820, y: CY - 5800 },
-      { x: CX + 820, y: CY - 6120 },
-      { x: CX + 820, y: CY - 6800 },
-      { x: CX + 820, y: CY - 7400 },
-    ],
-  },
-  {
-    id: 'ul_grodzka',
-    name: 'ul. Grodzka (Rynek -> Plac Wszystkich Świętych -> Wawel)',
-    width: 60,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX + 820, y: CY + 2200 },
-      { x: CX + 820, y: CY + 3600 },
-      { x: CX + 820, y: CY + 4600 },
-      { x: CX + 820, y: CY + 5500 },
-      { x: CX + 720, y: CY + 6500 },
-      { x: CX + 400, y: CY + 7800 },
-    ],
-  },
-  {
-    id: 'ul_kanonicza',
-    name: 'ul. Kanonicza (Najstarsza ulica Krakowa — Kanonie i Pałace)',
-    width: 46,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX + 240, y: CY + 4600 },
-      { x: CX + 240, y: CY + 6200 },
-      { x: CX - 80, y: CY + 7800 },
-    ],
-  },
-  {
-    id: 'ul_senacka',
-    name: 'ul. Senacka (Muzeum Archeologiczne)',
-    width: 40,
-    sidewalkWidth: 14,
-    path: [
-      { x: CX - 1000, y: CY + 5500 },
-      { x: CX + 1100, y: CY + 5500 },
-    ],
-  },
-  {
-    id: 'ul_poselska',
-    name: 'ul. Poselska (Klasztor Franciszkanów -> Grodzka -> Stolarska)',
-    width: 44,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 2200, y: CY + 4600 },
-      { x: CX + 1600, y: CY + 4600 },
-    ],
-  },
-
-  // --- ULICE PÓŁNOCNE ---
-  {
-    id: 'ul_slawkowska',
-    name: 'ul. Sławkowska (Rynek -> Planty -> Basztowa)',
-    width: 50,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX - 820, y: CY - 2200 },
-      { x: CX - 820, y: CY - 3600 },
-      { x: CX - 820, y: CY - 4800 },
-      { x: CX - 820, y: CY - 5800 },
-      { x: CX - 820, y: CY - 6800 },
-    ],
-  },
-  {
-    id: 'ul_sw_jana',
-    name: 'ul. św. Jana (Rynek -> Pałac Czartoryskich -> Pijarska)',
-    width: 46,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX, y: CY - 2200 },
-      { x: CX, y: CY - 3600 },
-      { x: CX, y: CY - 4800 },
-      { x: CX, y: CY - 5800 },
-    ],
-  },
-  {
-    id: 'ul_szczepanska',
-    name: 'ul. Szczepańska (Rynek -> Plac Szczepański)',
-    width: 48,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 2200, y: CY - 1800 },
-      { x: CX - 4000, y: CY - 1800 },
-    ],
-  },
-  {
-    id: 'ul_sw_tomasza',
-    name: 'ul. św. Tomasza (Główna przecznica północna)',
-    width: 44,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 3800, y: CY - 3600 },
-      { x: CX + 4000, y: CY - 3600 },
-    ],
-  },
-  {
-    id: 'ul_sw_marka',
-    name: 'ul. św. Marka',
-    width: 44,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 3800, y: CY - 4800 },
-      { x: CX + 4000, y: CY - 4800 },
-    ],
-  },
-  {
-    id: 'ul_pijarska',
-    name: 'ul. Pijarska (Wzdłuż Murów Obronnych)',
-    width: 48,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 3200, y: CY - 5800 },
-      { x: CX + 3400, y: CY - 5800 },
-    ],
-  },
-
-  // --- ULICE ZACHODNIE ---
-  {
-    id: 'ul_szewska',
-    name: 'ul. Szewska (Rynek -> Teatr Bagatela / Planty)',
-    width: 52,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX - 2200, y: CY - 820 },
-      { x: CX - 4400, y: CY - 820 },
-      { x: CX - 5800, y: CY - 820 },
-    ],
-  },
-  {
-    id: 'ul_sw_anny',
-    name: 'ul. św. Anny (Rynek -> Collegium Maius -> Planty)',
-    width: 50,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX - 2200, y: CY + 820 },
-      { x: CX - 4400, y: CY + 820 },
-      { x: CX - 5800, y: CY + 820 },
-    ],
-  },
-  {
-    id: 'ul_jagiellonska',
-    name: 'ul. Jagiellońska (Plac Szczepański -> Collegium Maius)',
-    width: 46,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 3600, y: CY - 2400 },
-      { x: CX - 3600, y: CY + 2200 },
-    ],
-  },
-  {
-    id: 'ul_golebia',
-    name: 'ul. Gołębia (Collegium Novum UJ)',
-    width: 44,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX - 5800, y: CY + 1800 },
-      { x: CX - 2200, y: CY + 1800 },
-    ],
-  },
-  {
-    id: 'ul_wislna',
-    name: 'ul. Wiślna (Rynek -> Planty / Franciszkańska)',
-    width: 50,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX - 820, y: CY + 2200 },
-      { x: CX - 820, y: CY + 3600 },
-      { x: CX - 2400, y: CY + 3600 },
-      { x: CX - 5200, y: CY + 3600 },
-    ],
-  },
-  {
-    id: 'ul_bracka',
-    name: 'ul. Bracka (Rynek -> Bazylika Franciszkanów)',
-    width: 46,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX, y: CY + 2200 },
-      { x: CX, y: CY + 3600 },
-    ],
-  },
-
-  // --- ULICE WSCHODNIE ---
-  {
-    id: 'ul_szpitalna',
-    name: 'ul. Szpitalna (Teatr Słowackiego -> Mały Rynek)',
-    width: 48,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX + 2400, y: CY - 2200 },
-      { x: CX + 2400, y: CY - 5800 },
-    ],
-  },
-  {
-    id: 'ul_mikolajska',
-    name: 'ul. Mikołajska (Rynek -> Mały Rynek -> Planty)',
-    width: 50,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX + 2200, y: CY - 820 },
-      { x: CX + 4400, y: CY - 820 },
-      { x: CX + 5800, y: CY - 820 },
-    ],
-  },
-  {
-    id: 'ul_sienna',
-    name: 'ul. Sienna (Rynek -> Mały Rynek -> Planty / Poczta Główna)',
-    width: 52,
-    sidewalkWidth: 18,
-    path: [
-      { x: CX + 2200, y: CY + 820 },
-      { x: CX + 4400, y: CY + 820 },
-      { x: CX + 5800, y: CY + 820 },
-    ],
-  },
-  {
-    id: 'ul_stolarska',
-    name: 'ul. Stolarska (Klasztor Dominikanów & Konsulaty)',
-    width: 44,
-    sidewalkWidth: 16,
-    path: [
-      { x: CX + 1800, y: CY + 820 },
-      { x: CX + 1800, y: CY + 3800 },
-    ],
-  },
-  {
-    id: 'ul_franciszkanska',
-    name: 'ul. Franciszkańska (Pałac Biskupi / Okno Papieskie)',
-    width: 62,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX - 5800, y: CY + 3600 },
-      { x: CX + 820, y: CY + 3600 },
-    ],
-  },
-  {
-    id: 'ul_dominikanska',
-    name: 'ul. Dominikańska (Plac Wszystkich Świętych -> Poczta)',
-    width: 60,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX + 820, y: CY + 3600 },
-      { x: CX + 5800, y: CY + 3600 },
-    ],
-  },
-
-  // --- ULICE OKOLIC WAWELU I OBWODNICA PLANT ---
-  {
-    id: 'ul_podzamcze',
-    name: 'ul. Podzamcze (Dojście pod Wawel)',
-    width: 62,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX - 4200, y: CY + 7800 },
-      { x: CX + 2400, y: CY + 7800 },
-    ],
-  },
-  {
-    id: 'ul_straszewskiego',
-    name: 'ul. Straszewskiego (Zachodnia obwodnica Plant)',
-    width: 62,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX - 6000, y: CY - 2800 },
-      { x: CX - 6000, y: CY + 5400 },
-      { x: CX - 4200, y: CY + 7800 },
-    ],
-  },
-  {
-    id: 'ul_basztowa',
-    name: 'ul. Basztowa (Północna obwodnica Plant)',
-    width: 64,
-    sidewalkWidth: 22,
-    path: [
-      { x: CX - 5400, y: CY - 6800 },
-      { x: CX + 5400, y: CY - 6800 },
-    ],
-  },
-  {
-    id: 'ul_westerplatte',
-    name: 'ul. Westerplatte (Wschodnia obwodnica Plant)',
-    width: 64,
-    sidewalkWidth: 22,
-    path: [
-      { x: CX + 6500, y: CY - 5600 },
-      { x: CX + 6500, y: CY + 3800 },
-    ],
-  },
-  {
-    id: 'ul_sw_gertrudy',
-    name: 'ul. św. Gertrudy (Południowo-wschodnia obwodnica Plant)',
-    width: 60,
-    sidewalkWidth: 20,
-    path: [
-      { x: CX + 6000, y: CY + 3600 },
-      { x: CX + 4000, y: CY + 6800 },
-      { x: CX + 1800, y: CY + 7800 },
-    ],
-  },
-];
+import { KRAKOW_STREETS } from './krakowStreetsData';
+export { KRAKOW_STREETS };
 
 // ========================================================
-// 4. PLANTY KRAKOWSKIE (Continuous Green Belt Ring)
+// 4. PLANTY KRAKOWSKIE & PARKI OBSZARU 1.5 KM
+// (Pełna baza 301 obszarów parkowych i zieleńców z kartografii Krakowa)
 // ========================================================
-export const KRAKOW_PARKS: ParkData[] = [
-  {
-    id: 'planty_barbakan',
-    name: 'Planty — Ogród przy Barbakanie i Bramie Floriańskiej',
-    polygon: [
-      { x: CX - 5000, y: CY - 6700 },
-      { x: CX + 5000, y: CY - 6700 },
-      { x: CX + 5000, y: CY - 5900 },
-      { x: CX - 5000, y: CY - 5900 },
-    ],
-  },
-  {
-    id: 'planty_slowacki',
-    name: 'Planty — Ogród przy Teatrze Słowackiego i św. Krzyżu',
-    polygon: [
-      { x: CX + 4800, y: CY - 6700 },
-      { x: CX + 6400, y: CY - 6700 },
-      { x: CX + 6400, y: CY - 2600 },
-      { x: CX + 4800, y: CY - 2600 },
-    ],
-  },
-  {
-    id: 'planty_grodek',
-    name: 'Planty — Ogród Na Gródku (Mikołajska / Sienna)',
-    polygon: [
-      { x: CX + 4800, y: CY - 2600 },
-      { x: CX + 6400, y: CY - 2600 },
-      { x: CX + 6400, y: CY + 2200 },
-      { x: CX + 4800, y: CY + 2200 },
-    ],
-  },
-  {
-    id: 'planty_straszewski',
-    name: 'Planty — Ogród Uniwersytecki (Collegium Novum & Bagatela)',
-    polygon: [
-      { x: CX - 6400, y: CY - 5900 },
-      { x: CX - 4800, y: CY - 5900 },
-      { x: CX - 4800, y: CY + 4800 },
-      { x: CX - 6400, y: CY + 4800 },
-    ],
-  },
-  {
-    id: 'planty_wawel',
-    name: 'Planty — Ogród Zamkowy pod Wawelem',
-    polygon: [
-      { x: CX - 4800, y: CY + 4800 },
-      { x: CX + 3600, y: CY + 4800 },
-      { x: CX + 3600, y: CY + 7600 },
-      { x: CX - 4800, y: CY + 7600 },
-    ],
-  },
-  {
-    id: 'wzgorze_wawelskie_ogrody',
-    name: 'Wzgórze Wawelskie — Ogrody Królewskie i Zbocza',
-    polygon: [
-      { x: CX - 3200, y: CY + 7800 },
-      { x: CX + 2800, y: CY + 7800 },
-      { x: CX + 2800, y: CY + 11500 },
-      { x: CX - 3200, y: CY + 11500 },
-    ],
-  },
-];
+import { KRAKOW_PARKS } from './krakowParksData';
+export { KRAKOW_PARKS };
 
 // ========================================================
 // 5. PEŁNY KATALOG BUDYNKÓW I KAMIENIC STAREGO MIASTA
@@ -885,7 +533,106 @@ export function generateKrakowProps(): PropData[] {
     hasCollision: true,
   });
 
-  return props;
+  // ------------------------------------------------------
+  // F. GEOMETRY SANITIZATION (ZERO PROPS INSIDE BUILDINGS)
+  // ------------------------------------------------------
+  function pointInPolygonCheck(pt: { x: number; y: number }, poly: { x: number; y: number }[]): boolean {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i].x, yi = poly[i].y;
+      const xj = poly[j].x, yj = poly[j].y;
+      const intersect = ((yi > pt.y) !== (yj > pt.y)) &&
+        (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // ------------------------------------------------------
+  // F. DRZEWA I ŁAWKI W NOWO DODANYCH PARKACH (P1 - P298)
+  // ------------------------------------------------------
+  for (let pi = 0; pi < KRAKOW_PARKS.length; pi += 2) {
+    const park = KRAKOW_PARKS[pi];
+    if (park.polygon.length >= 4) {
+      const minX = Math.min(...park.polygon.map(pt => pt.x));
+      const maxX = Math.max(...park.polygon.map(pt => pt.x));
+      const minY = Math.min(...park.polygon.map(pt => pt.y));
+      const maxY = Math.max(...park.polygon.map(pt => pt.y));
+      const pw = maxX - minX;
+      const ph = maxY - minY;
+
+      if (pw > 180 && ph > 180) {
+        props.push({
+          id: `park_tree_${propId++}`,
+          type: 'tree',
+          x: Math.round(minX + pw * 0.5),
+          y: Math.round(minY + ph * 0.5),
+          radius: 38,
+          hasCollision: true,
+        });
+        if (pw > 320 && ph > 320) {
+          props.push({
+            id: `park_bench_${propId++}`,
+            type: 'bench',
+            x: Math.round(minX + pw * 0.3),
+            y: Math.round(minY + ph * 0.7),
+            w: 42,
+            h: 18,
+            hasCollision: false,
+          });
+        }
+      }
+    }
+  }
+
+  function distSqToSegmentCheck(p: { x: number; y: number }, v: { x: number; y: number }, w: { x: number; y: number }): number {
+    const l2 = (v.x - w.x) * (v.x - w.x) + (v.y - w.y) * (v.y - w.y);
+    if (l2 === 0) return (p.x - v.x) * (p.x - v.x) + (p.y - v.y) * (p.y - v.y);
+    let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return (p.x - (v.x + t * (w.x - v.x))) * (p.x - (v.x + t * (w.x - v.x))) +
+           (p.y - (v.y + t * (w.y - v.y))) * (p.y - (v.y + t * (w.y - v.y)));
+  }
+
+  // Precompute building bounding boxes for 10x faster prop filtering
+  const buildingBoxes = KRAKOW_BUILDINGS.map(b => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const pt of b.polygon) {
+      if (pt.x < minX) minX = pt.x;
+      if (pt.x > maxX) maxX = pt.x;
+      if (pt.y < minY) minY = pt.y;
+      if (pt.y > maxY) maxY = pt.y;
+    }
+    return { b, minX, maxX, minY, maxY };
+  });
+
+  // Filter out any prop that is inside any building or whose tree canopy touches a building wall
+  const cleanProps = props.filter(prop => {
+    const rad = prop.radius || (prop.w ? Math.max(prop.w, prop.h || 0) / 2 : 12);
+    for (const box of buildingBoxes) {
+      if (
+        prop.x + rad < box.minX ||
+        prop.x - rad > box.maxX ||
+        prop.y + rad < box.minY ||
+        prop.y - rad > box.maxY
+      ) {
+        continue;
+      }
+      if (pointInPolygonCheck(prop, box.b.polygon)) return false;
+      if (prop.type === 'tree') {
+        for (let k = 0; k < box.b.polygon.length; k++) {
+          const p1 = box.b.polygon[k];
+          const p2 = box.b.polygon[(k + 1) % box.b.polygon.length];
+          if (distSqToSegmentCheck(prop, p1, p2) < (rad * 0.8) * (rad * 0.8)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  return cleanProps;
 }
 
 export const KRAKOW_PROPS: PropData[] = generateKrakowProps();
@@ -1001,6 +748,98 @@ export function generateObstacles(): Obstacle[] {
       }
     }
   }
+
+  // 3. OGRODZENIA PARKOWE Z WEJŚCIAMI BRAMNYMI (Wymóg: parki otoczone ogrodzeniem z kilkoma wejściami)
+  for (const park of KRAKOW_PARKS) {
+    if (!park.gates || park.gates.length === 0) continue;
+    const pts = park.polygon;
+    if (pts.length < 4) continue;
+
+    for (let i = 0; i < pts.length; i++) {
+      const p1 = pts[i];
+      const p2 = pts[(i + 1) % pts.length];
+
+      // Znajdź bramkę leżącą na tej krawędzi ogrodzenia
+      const edgeGates = park.gates.filter(g => {
+        const abx = p2.x - p1.x;
+        const aby = p2.y - p1.y;
+        const lenSq = abx * abx + aby * aby;
+        if (lenSq === 0) return false;
+        const t = ((g.x - p1.x) * abx + (g.y - p1.y) * aby) / lenSq;
+        if (t < 0.05 || t > 0.95) return false;
+        const projX = p1.x + t * abx;
+        const projY = p1.y + t * aby;
+        return Math.hypot(g.x - projX, g.y - projY) < 30;
+      });
+
+      if (edgeGates.length === 0) {
+        // Pełne ogrodzenie na tym boku
+        obstacles.push({
+          id: `fence_${park.id}_${i}`,
+          points: makeWallSegment(p1, p2, 10),
+          isBuilding: false,
+        });
+      } else {
+        const gate = edgeGates[0];
+        const halfGate = (gate.width || 90) / 2;
+        const edgeLen = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const dirX = (p2.x - p1.x) / edgeLen;
+        const dirY = (p2.y - p1.y) / edgeLen;
+
+        const gateLeft = {
+          x: Math.round(gate.x - dirX * halfGate),
+          y: Math.round(gate.y - dirY * halfGate),
+        };
+        const gateRight = {
+          x: Math.round(gate.x + dirX * halfGate),
+          y: Math.round(gate.y + dirY * halfGate),
+        };
+
+        // Przęsło przed bramką
+        obstacles.push({
+          id: `fence_${park.id}_${i}_a`,
+          points: makeWallSegment(p1, gateLeft, 10),
+          isBuilding: false,
+        });
+        // Przęsło za bramką
+        obstacles.push({
+          id: `fence_${park.id}_${i}_b`,
+          points: makeWallSegment(gateRight, p2, 10),
+          isBuilding: false,
+        });
+        // PRZERWA BRAMNA: [gateLeft <-> gateRight] pozostaje OTWARTA do swobodnego przechodzenia!
+      }
+    }
+  }
+
+  // 4. NIEPRZEKRACZALNY MUR GRANICZNY OBSZARU 1.5 KM (Koniec mapy jest zablokowany!)
+  const W_SIZE = WORLD_SIZE_PX;
+  const WALL_THICK = 80;
+
+  // Granica północna (y = 0)
+  obstacles.push({
+    id: 'border_wall_north',
+    points: makeRect(-150, -20, W_SIZE + 300, WALL_THICK),
+    isBuilding: false,
+  });
+  // Granica południowa (y = W_SIZE)
+  obstacles.push({
+    id: 'border_wall_south',
+    points: makeRect(-150, W_SIZE - WALL_THICK + 20, W_SIZE + 300, WALL_THICK),
+    isBuilding: false,
+  });
+  // Granica zachodnia (x = 0)
+  obstacles.push({
+    id: 'border_wall_west',
+    points: makeRect(-20, -150, WALL_THICK, W_SIZE + 300),
+    isBuilding: false,
+  });
+  // Granica wschodnia (x = W_SIZE)
+  obstacles.push({
+    id: 'border_wall_east',
+    points: makeRect(W_SIZE - WALL_THICK + 20, -150, WALL_THICK, W_SIZE + 300),
+    isBuilding: false,
+  });
 
   return obstacles;
 }

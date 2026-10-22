@@ -19,6 +19,9 @@ export default function App() {
   // Engine instance stored in ref so it is never recreated during renders
   const engineRef = useRef<GameEngine>(new GameEngine(playerColor));
   const engine = engineRef.current;
+  if (typeof window !== 'undefined') {
+    (window as any).__CITY_ROYALE_ENGINE__ = engine;
+  }
 
   // Active inputs
   const keysRef = useRef<Record<string, boolean>>({});

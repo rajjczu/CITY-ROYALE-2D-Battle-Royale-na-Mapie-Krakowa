@@ -32,3 +32,18 @@
 - [x] Syntetyzator dźwięku proceduralnego Web Audio API (strzały, przeładowania, uderzenia, syreny, fanfara)
 - [x] Testy jednostkowe czystej logiki (`src/game/physics.test.ts`, `src/game/weapons.test.ts`)
 - [x] Ekran końcowy z podsumowaniem statystyk (pozycja, zabójstwa, obrażenia, czas) i opcją restartu
+
+## Faza 5: Pełna integracja kartograficzna (813 budynków i 301 parków)
+- [x] Uzupełnienie bazy parków o 298 autentycznych zieleńców, skwerów i ogrodów z bazy kartograficznej (razem 301 obszarów parkowych w `src/data/krakowParksData.ts`)
+- [x] Uzupełnienie budynków o 206 brakujących dachów i gmachów miejskich (razem 813 kamienic i monumentów w `src/data/krakowBuildings.ts`)
+- [x] Zachowanie 50% budynków z wejściami, oknami, meblami i znikającym dachem (roof-fade)
+- [x] Dynamiczne rozmieszczenie drzew i ławek w nowych parkach miejskich
+- [x] Wydajny Frustum Culling na Canvas 2D dla parków, placów i budynków gwarantujący 60+ FPS
+- [x] 100% testów jednostkowych pomyślnie zaliczonych (`krakowUrbanFeatures.test.ts`, `krakowMap15km.test.ts`, `physics.test.ts`)
+
+## Faza 6: Ogrodzenia parkowe z wejściami bramnymi oraz gęsta siatka 479 ulic
+- [x] Kompletna siatka 479 ulic miejskich i alejek spacerowych zintegrowana z załączonym planem kartograficznym (`src/data/krakowStreetsData.ts`)
+- [x] Obwodowe ogrodzenia parkowe z fizyczną kolizją dla wszystkich 301 parków i zieleńców
+- [x] Każdy park posiada od 2 do 4 otwartych wejść bramnych (bramki ze słupkami kamiennymi i brukowanymi przejściami)
+- [x] Wizualna reprezentacja ogrodzeń z kutego żelaza na Canvas 2D oraz bursztynowe wskaźniki wejść na mapie taktycznej [M]
+- [x] Zoptymalizowany frustum culling ulic i ogrodzeń utrzymujący płynne 60 FPS

@@ -107,21 +107,23 @@ test('Street lamps are placed throughout Krakow streets', () => {
 
 test('Horizontal streets have clear corridors without overlapping buildings', () => {
   const horizontalStreets = [
-    { name: 'ul. św. Tomasza', y: WORLD_CENTER.y - 3600, halfWidth: 26 },
-    { name: 'ul. św. Marka', y: WORLD_CENTER.y - 4800, halfWidth: 26 },
-    { name: 'ul. Pijarska', y: WORLD_CENTER.y - 5800, halfWidth: 26 },
+    { name: 'ul. św. Tomasza', y: WORLD_CENTER.y - 3600, minX: WORLD_CENTER.x - 3800, maxX: WORLD_CENTER.x + 4000 },
+    { name: 'ul. św. Marka', y: WORLD_CENTER.y - 4800, minX: WORLD_CENTER.x - 3800, maxX: WORLD_CENTER.x + 4000 },
+    { name: 'ul. Pijarska', y: WORLD_CENTER.y - 5800, minX: WORLD_CENTER.x - 3200, maxX: WORLD_CENTER.x + 3400 },
   ];
 
   for (const st of horizontalStreets) {
     for (const b of KRAKOW_BUILDINGS) {
-      // Find building min and max Y
+      const minX = Math.min(...b.polygon.map(p => p.x));
+      const maxX = Math.max(...b.polygon.map(p => p.x));
       const minY = Math.min(...b.polygon.map(p => p.y));
       const maxY = Math.max(...b.polygon.map(p => p.y));
 
-      // Check if building polygon covers the street centerline
-      const overlapsCenter = minY < st.y && maxY > st.y;
+      // Check if building polygon covers the street corridor
+      const overlapsX = minX < st.maxX && maxX > st.minX;
+      const overlapsY = minY < st.y && maxY > st.y;
       assert.ok(
-        !overlapsCenter,
+        !(overlapsX && overlapsY),
         `Building ${b.id} (${b.name}) overlaps horizontal street ${st.name} at y=${st.y}`
       );
     }

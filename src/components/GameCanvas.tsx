@@ -101,10 +101,33 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Center camera
       ctx.translate(width / 2 - camX, height / 2 - camY);
 
-      // A. World Boundary outline
-      ctx.strokeStyle = '#2d241e';
-      ctx.lineWidth = 20;
+      // A. World Boundary: Nieprzekraczalny Mur Graniczny 1.5 km (Koniec mapy jest zablokowany!)
+      const WALL_THICK = 80;
+
+      // Ciemna strefa poza granicami mapy (Out of Bounds Void)
+      ctx.fillStyle = '#0f0e0c';
+      ctx.fillRect(-4000, -4000, WORLD_SIZE_PX + 8000, 4000); // Północ
+      ctx.fillRect(-4000, WORLD_SIZE_PX, WORLD_SIZE_PX + 8000, 4000); // Południe
+      ctx.fillRect(-4000, 0, 4000, WORLD_SIZE_PX); // Zachód
+      ctx.fillRect(WORLD_SIZE_PX, 0, 4000, WORLD_SIZE_PX); // Wschód
+
+      // Masywny obronny mur kamienny wzdłuż krawędzi 1.5 km
+      ctx.fillStyle = '#26221d';
+      ctx.fillRect(0, 0, WORLD_SIZE_PX, WALL_THICK);
+      ctx.fillRect(0, WORLD_SIZE_PX - WALL_THICK, WORLD_SIZE_PX, WALL_THICK);
+      ctx.fillRect(0, 0, WALL_THICK, WORLD_SIZE_PX);
+      ctx.fillRect(WORLD_SIZE_PX - WALL_THICK, 0, WALL_THICK, WORLD_SIZE_PX);
+
+      // Kamienne blanki i gzymsy obronne
+      ctx.strokeStyle = '#423a31';
+      ctx.lineWidth = 4;
       ctx.strokeRect(0, 0, WORLD_SIZE_PX, WORLD_SIZE_PX);
+      ctx.strokeRect(WALL_THICK, WALL_THICK, WORLD_SIZE_PX - 2 * WALL_THICK, WORLD_SIZE_PX - 2 * WALL_THICK);
+
+      // Czerwono-białe ostrzegawcze paski blokady granicznej
+      ctx.strokeStyle = '#b91c1c';
+      ctx.lineWidth = 5;
+      ctx.strokeRect(WALL_THICK - 2, WALL_THICK - 2, WORLD_SIZE_PX - 2 * WALL_THICK + 4, WORLD_SIZE_PX - 2 * WALL_THICK + 4);
 
       // B. Rzeka Wisła (Vistula River)
       ctx.fillStyle = '#2b5270';
@@ -121,8 +144,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.lineWidth = 14;
       ctx.stroke();
 
+      // Viewport bounds for high-performance frustum culling
+      const viewMargin = 250;
+      const vLeft = camX - width / 2 - viewMargin;
+      const vRight = camX + width / 2 + viewMargin;
+      const vTop = camY - height / 2 - viewMargin;
+      const vBottom = camY + height / 2 + viewMargin;
+
       // C. Place i Rynki (Plazas & Squares - granite flagstones)
       for (const plaza of KRAKOW_PLAZAS) {
+        let plMinX = Infinity, plMaxX = -Infinity, plMinY = Infinity, plMaxY = -Infinity;
+        for (const pt of plaza.polygon) {
+          if (pt.x < plMinX) plMinX = pt.x;
+          if (pt.x > plMaxX) plMaxX = pt.x;
+          if (pt.y < plMinY) plMinY = pt.y;
+          if (pt.y > plMaxY) plMaxY = pt.y;
+        }
+        if (plMaxX < vLeft || plMinX > vRight || plMaxY < vTop || plMinY > vBottom) {
+          continue;
+        }
+
         ctx.fillStyle = '#c7bcab';
         ctx.beginPath();
         plaza.polygon.forEach((pt, i) => {
@@ -145,8 +186,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillText(plaza.name, midX, midY);
       }
 
-      // D. Parki (Planty Krakowskie w pełnym obwodzie)
+      // D. Parki i Zieleńce (Pełna siatka 301 parków Krakowa z ogrodzeniami i wejściami bramnymi)
       for (const park of KRAKOW_PARKS) {
+        let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
+        for (const pt of park.polygon) {
+          if (pt.x < pMinX) pMinX = pt.x;
+          if (pt.x > pMaxX) pMaxX = pt.x;
+          if (pt.y < pMinY) pMinY = pt.y;
+          if (pt.y > pMaxY) pMaxY = pt.y;
+        }
+        if (pMaxX < vLeft || pMinX > vRight || pMaxY < vTop || pMinY > vBottom) {
+          continue;
+        }
+
+        // 1. Trawnik parkowy
         ctx.fillStyle = '#5c854b';
         ctx.beginPath();
         park.polygon.forEach((pt, i) => {
@@ -156,16 +209,117 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.closePath();
         ctx.fill();
 
-        // Park border line
+        // 2. Krawędź zieleni
         ctx.strokeStyle = '#436634';
-        ctx.lineWidth = 8;
+        ctx.lineWidth = 4;
         ctx.stroke();
+
+        // 3. Ogrodzenie parkowe z kilkoma wejściami bramnymi
+        const pts = park.polygon;
+        const gates = park.gates || [];
+
+        for (let i = 0; i < pts.length; i++) {
+          const p1 = pts[i];
+          const p2 = pts[(i + 1) % pts.length];
+
+          const edgeGates = gates.filter(g => {
+            const abx = p2.x - p1.x;
+            const aby = p2.y - p1.y;
+            const lenSq = abx * abx + aby * aby;
+            if (lenSq === 0) return false;
+            const t = ((g.x - p1.x) * abx + (g.y - p1.y) * aby) / lenSq;
+            if (t < 0.05 || t > 0.95) return false;
+            const projX = p1.x + t * abx;
+            const projY = p1.y + t * aby;
+            return Math.hypot(g.x - projX, g.y - projY) < 30;
+          });
+
+          if (edgeGates.length === 0) {
+            // Ciągłe stylowe ogrodzenie żelazne
+            ctx.strokeStyle = '#2b3035';
+            ctx.lineWidth = 7;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#181a1b';
+            ctx.lineWidth = 3.5;
+            ctx.stroke();
+          } else {
+            const gate = edgeGates[0];
+            const halfGate = (gate.width || 90) / 2;
+            const edgeLen = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            const dirX = (p2.x - p1.x) / edgeLen;
+            const dirY = (p2.y - p1.y) / edgeLen;
+
+            const gateLeft = {
+              x: Math.round(gate.x - dirX * halfGate),
+              y: Math.round(gate.y - dirY * halfGate),
+            };
+            const gateRight = {
+              x: Math.round(gate.x + dirX * halfGate),
+              y: Math.round(gate.y + dirY * halfGate),
+            };
+
+            // Przęsło 1
+            ctx.strokeStyle = '#2b3035';
+            ctx.lineWidth = 7;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(gateLeft.x, gateLeft.y);
+            ctx.stroke();
+
+            // Przęsło 2
+            ctx.beginPath();
+            ctx.moveTo(gateRight.x, gateRight.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+
+            // Metalowy rdzeń przęseł
+            ctx.strokeStyle = '#181a1b';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(gateLeft.x, gateLeft.y);
+            ctx.moveTo(gateRight.x, gateRight.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+
+            // Brukowane wejście bramne
+            ctx.strokeStyle = '#b5ab9a';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(gateLeft.x, gateLeft.y);
+            ctx.lineTo(gateRight.x, gateRight.y);
+            ctx.stroke();
+
+            // Słupki bramne kamienne
+            ctx.fillStyle = '#2f3336';
+            ctx.fillRect(gateLeft.x - 6, gateLeft.y - 6, 12, 12);
+            ctx.fillRect(gateRight.x - 6, gateRight.y - 6, 12, 12);
+            ctx.fillStyle = '#6b7280';
+            ctx.fillRect(gateLeft.x - 4, gateLeft.y - 4, 8, 8);
+            ctx.fillRect(gateRight.x - 4, gateRight.y - 4, 8, 8);
+          }
+        }
       }
 
-      // E. Ulice i Chodniki (Streets, Roadways & Sidewalks)
+      // E. Ulice i Chodniki (Streets, Roadways & Sidewalks — 479 ulic i alejek)
       const cobblePattern = cobbleCanvasCached ? ctx.createPattern(cobbleCanvasCached, 'repeat') : null;
 
       for (const st of KRAKOW_STREETS) {
+        let sMinX = Infinity, sMaxX = -Infinity, sMinY = Infinity, sMaxY = -Infinity;
+        for (const pt of st.path) {
+          if (pt.x < sMinX) sMinX = pt.x;
+          if (pt.x > sMaxX) sMaxX = pt.x;
+          if (pt.y < sMinY) sMinY = pt.y;
+          if (pt.y > sMaxY) sMaxY = pt.y;
+        }
+        const pad = st.width + 60;
+        if (sMaxX < vLeft - pad || sMinX > vRight + pad || sMaxY < vTop - pad || sMinY > vBottom + pad) {
+          continue;
+        }
         const sw = st.sidewalkWidth || 18;
 
         // 1. Chodnik brukowany po lewej i prawej stronie (ma widać że jest brukowany!)
@@ -222,12 +376,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       // F. Budynki i Proceduralne Wnętrza (All Old Town Buildings)
-      const viewMargin = 250;
-      const vLeft = camX - width / 2 - viewMargin;
-      const vRight = camX + width / 2 + viewMargin;
-      const vTop = camY - height / 2 - viewMargin;
-      const vBottom = camY + height / 2 + viewMargin;
-
       for (const b of KRAKOW_BUILDINGS) {
         // Fast bounding box culling for 60+ FPS with 500+ buildings
         let bMinX = Infinity, bMaxX = -Infinity, bMinY = Infinity, bMaxY = -Infinity;

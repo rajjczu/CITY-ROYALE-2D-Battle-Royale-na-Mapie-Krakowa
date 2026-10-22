@@ -1,6 +1,6 @@
 import { EntityState, GroundItem, Point, WeaponId } from '../types/game';
 import { distance, distanceSq, pointInPolygon, resolveCirclePolygonCollision } from './physics';
-import { BASE_SPEED, PLAYER_RADIUS } from './constants';
+import { BASE_SPEED, PLAYER_RADIUS, WORLD_SIZE_PX } from './constants';
 import { WEAPON_REGISTRY } from './weapons';
 import { ZoneManager } from './zone';
 import { SpatialHash } from './spatialHash';
@@ -168,8 +168,9 @@ export class BotAI {
         }
 
         me.walkCycle += moveDist * 0.1;
-        me.x = nextPos.x;
-        me.y = nextPos.y;
+        const BORDER_PAD = PLAYER_RADIUS + 10;
+        me.x = Math.max(BORDER_PAD, Math.min(WORLD_SIZE_PX - BORDER_PAD, nextPos.x));
+        me.y = Math.max(BORDER_PAD, Math.min(WORLD_SIZE_PX - BORDER_PAD, nextPos.y));
       }
     }
 

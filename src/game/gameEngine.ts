@@ -18,6 +18,7 @@ import {
   SPRINT_MULTIPLIER,
   TOTAL_MATCH_PLAYERS,
   WORLD_CENTER,
+  WORLD_SIZE_PX,
 } from './constants';
 import { WEAPON_REGISTRY } from './weapons';
 import {
@@ -380,8 +381,10 @@ export class GameEngine {
       }
 
       p.walkCycle += Math.hypot(moveX, moveY) * 0.1;
-      p.x = nextPos.x;
-      p.y = nextPos.y;
+      // Koniec mapy jest zablokowany: bezwzględna blokada przejścia poza kwadrat 1.5 km
+      const BORDER_PAD = PLAYER_RADIUS + 6;
+      p.x = Math.max(BORDER_PAD, Math.min(WORLD_SIZE_PX - BORDER_PAD, nextPos.x));
+      p.y = Math.max(BORDER_PAD, Math.min(WORLD_SIZE_PX - BORDER_PAD, nextPos.y));
     }
 
     // Check building interior entry (for smooth roof fade!)

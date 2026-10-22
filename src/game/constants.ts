@@ -1,17 +1,17 @@
 import { WeaponId } from '../types/game';
 
 export const PIXELS_PER_METER = 24; // 1 meter = 24 pixels in the 2D world
-export const WORLD_SIZE_METERS = 2000; // 2.0 km square (Krakow Old Town, Planty, Wawel, Wisla)
-export const WORLD_SIZE_PX = WORLD_SIZE_METERS * PIXELS_PER_METER; // 48,000 px
+export const WORLD_SIZE_METERS = 1500; // Exact 1.5 km square (1500m x 1500m)
+export const WORLD_SIZE_PX = WORLD_SIZE_METERS * PIXELS_PER_METER; // 36,000 px
 
 export const PLAYER_RADIUS = 14; // ~0.6m radius
 export const BASE_SPEED = 5.2 * PIXELS_PER_METER; // ~125 px/s
 export const SPRINT_MULTIPLIER = 1.38;
 
-// GPS reference for Rynek Główny (Main Market Square) in Kraków
+// GPS reference for center of 1.5 km Kraków map (midpoint of Stare Miasto & Wawel)
 export const KRAKOW_GPS = {
-  lat: 50.0614,
-  lon: 19.9366,
+  lat: 50.05985,
+  lon: 19.9380,
 };
 
 // Center of the game map corresponding to Rynek Główny

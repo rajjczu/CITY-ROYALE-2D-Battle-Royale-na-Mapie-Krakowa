@@ -91,10 +91,19 @@ export interface PlazaData {
   polygon: Point[];
 }
 
+export interface ParkGate {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  side: 'top' | 'bottom' | 'left' | 'right';
+}
+
 export interface ParkData {
   id: string;
   name: string;
   polygon: Point[];
+  gates?: ParkGate[];
 }
 
 export interface PropData {

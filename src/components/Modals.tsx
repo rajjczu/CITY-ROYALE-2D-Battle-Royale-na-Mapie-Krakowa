@@ -69,7 +69,7 @@ export const MapModal: React.FC<MapModalProps> = ({ engine, onClose }) => {
     rynek: { name: '🏬 Rynek Główny', x: CX - 3000, y: CY - 3000, w: 6000, h: 6000 },
     florianska: { name: '🛡️ Brama Floriańska & Barbakan', x: CX - 1600, y: CY - 7400, w: 4200, h: 5400 },
     wawel: { name: '👑 Wawel & Wisła', x: CX - 2800, y: CY + 7300, w: 5600, h: 6200 },
-    arena: { name: '🌐 Cała Arena 2km', x: 0, y: 0, w: WORLD_SIZE_PX, h: WORLD_SIZE_PX },
+    arena: { name: '🌐 Cała Mapa 1,5 km', x: 0, y: 0, w: WORLD_SIZE_PX, h: WORLD_SIZE_PX },
   };
 
   const curBox = VIEW_PRESETS[mapPreset];
@@ -272,11 +272,26 @@ export const MapModal: React.FC<MapModalProps> = ({ engine, onClose }) => {
                   );
                 })}
 
-                {/* 4. Planty Krakowskie (Parks) */}
+                {/* 4. Planty Krakowskie i Parki z ogrodzeniami i wejściami */}
                 {showParks &&
                   KRAKOW_PARKS.map(p => {
                     const pointsStr = p.polygon.map(pt => `${pt.x},${pt.y}`).join(' ');
-                    return <polygon key={p.id} points={pointsStr} fill="#365314" opacity="0.75" />;
+                    return (
+                      <g key={p.id}>
+                        <polygon points={pointsStr} fill="#365314" opacity="0.8" stroke="#1c1917" strokeWidth="10" />
+                        {p.gates?.map(g => (
+                          <circle
+                            key={g.id}
+                            cx={g.x}
+                            cy={g.y}
+                            r="20"
+                            fill="#f59e0b"
+                            stroke="#78350f"
+                            strokeWidth="6"
+                          />
+                        ))}
+                      </g>
+                    );
                   })}
 
                 {/* 5. Ulice i Chodniki (Streets & Sidewalks) */}
